@@ -31,22 +31,26 @@ namespace BrickGame
 
             while (!czyUderzony)
             {
-                //zczytanie jaki klawisz na klawiaturze został wciśnięty
-                ConsoleKeyInfo nacisnietyKlawisz = Console.ReadKey(true);
-                if (nacisnietyKlawisz.Key == ConsoleKey.RightArrow)
+
+                if (Console.KeyAvailable)
                 {
-                    // pozacyja  gracza   0   1   2
-                    if (pozycjaGracza < 2)
+                    //zczytanie jaki klawisz na klawiaturze został wciśnięty
+                    ConsoleKeyInfo nacisnietyKlawisz = Console.ReadKey(true);
+                    if (nacisnietyKlawisz.Key == ConsoleKey.RightArrow)
                     {
-                        pozycjaGracza++;
+                        // pozacyja  gracza   0   1   2
+                        if (pozycjaGracza < 2)
+                        {
+                            pozycjaGracza++;
+                        }
                     }
-                }
-                if (nacisnietyKlawisz.Key == ConsoleKey.LeftArrow)
-                {
-                    // pozacyja  gracza   0   1   2
-                    if (pozycjaGracza > 0)
+                    if (nacisnietyKlawisz.Key == ConsoleKey.LeftArrow)
                     {
-                        pozycjaGracza--;
+                        // pozacyja  gracza   0   1   2
+                        if (pozycjaGracza > 0)
+                        {
+                            pozycjaGracza--;
+                        }
                     }
                 }
 

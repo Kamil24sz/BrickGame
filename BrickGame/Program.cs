@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,12 +13,20 @@ namespace BrickGame
         static string[] plansza;
         const string GRACZ = "^";
         const string PRZESZKODA = "#";
+        const string NITRO = "N";
+        //zmienna do zliczania punktów
+        static int punkty = 0;
         static void Main(string[] args)
         {
             //zmienne dla naszej gry
 
             // 0 -> po lewej  1 -> na środku  2 -> po prawej
             int pozycjaGracza = 1;
+
+            // dodajemy funkcjonalność nitro - czyli przyspieszenia 
+            int czasNitro = -1;
+            int wartoscNitro = 0;
+            bool czyPaliwoNitro = false;
 
             bool czyUderzony = false;
 
@@ -52,6 +61,19 @@ namespace BrickGame
                             pozycjaGracza--;
                         }
                     }
+                    if(nacisnietyKlawisz.Key == ConsoleKey.Spacebar && czyPaliwoNitro)
+                    {
+                        if(czasNitro == -1)
+                        {
+                            czasNitro = 10;
+                            czyPaliwoNitro = false;
+                        }
+                    }
+                    //czyszczenie buforu - usuwanie zakolejkowanych ruchów
+                    while (Console.KeyAvailable)
+                    {
+                        Console.ReadKey(false);
+                    }
                 }
 
                 //sprawdzenie uderzenia
@@ -60,10 +82,28 @@ namespace BrickGame
                 {
                     czyUderzony = true;
                 }
+                else
+                {
+                    punkty++;
+                }
+
+                //sprawdzenie czy zdobyto nitro
+                int pozycjaNajblizszegoNitro = plansza[plansza.Length - 2].IndexOf(NITRO);
+                if(pozycjaGracza == pozycjaNajblizszegoNitro)
+                {
+                    czyPaliwoNitro = true;
+                }
 
                 //nowa przeszkoda
                 int pozycjaPrzeszkody = random.Next(0,3);
                 string przeszkoda = UstawPrzeszkode(pozycjaPrzeszkody);
+
+                if(random.Next(20) == 0)
+                {
+                    int pozycjaNitro = random.Next(3);
+                    przeszkoda = UstawNitro(pozycjaNitro, przeszkoda);
+                }
+
 
                 //przesunięcie planszy w dół + dodanie do niej przeszkody
                 for(int i = plansza.Length - 2; i > 0; i--)
@@ -74,12 +114,32 @@ namespace BrickGame
 
                 UstawGracza(pozycjaGracza);
                 PokazPlansze();
-                Thread.Sleep(600);
+                Console.WriteLine();
+                Console.WriteLine($"Punkty: {punkty}");
+                Console.WriteLine($"Nitro: {czyPaliwoNitro}");
+                //wprowadzenie mechanizmu nitro
+                if(czasNitro > 0)
+                {
+                    wartoscNitro = 100;
+                    czasNitro--;
+                }
+                else if(czasNitro == 0)
+                {
+                    wartoscNitro = 0;
+                    czasNitro = -1;
+                }
+                // zwiększenie prędkości co 1 ruch przeszkody 
+                if (punkty + wartoscNitro < 600)
+                {
+                    Thread.Sleep(600 - punkty - wartoscNitro);
+                }
             }
 
             Console.Clear();
             Console.WriteLine("GAME OVER");
+            Console.WriteLine($"Zdobyłeś {punkty} punktów");
 
+            Thread.Sleep(2000);
             //TO JEST KONIEC PROGRAMU
             Console.ReadKey();
         }
@@ -112,6 +172,13 @@ namespace BrickGame
         {
             string linia = "   "; //3 spacje
             linia = linia.Insert(pozycja, PRZESZKODA);
+            return linia;
+        }
+
+        //funkcja do ustawiania Nitro na podstawie pozycji i lini w której ma być umieszczone
+        private static string UstawNitro(int pozycja, string linia)
+        {
+            linia = linia.Remove(pozycja,1).Insert(pozycja, NITRO);
             return linia;
         }
     }
